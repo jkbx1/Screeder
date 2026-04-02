@@ -2,7 +2,7 @@
 
 A modern, high-performance web app for recording, sharing, and analyzing screen captures — powered by **Mux** for video infrastructure and **OpenAI** for AI summaries.
 
-> **Live Demo:** [https://luminafinanceapp.netlify.app/)
+> **Live Demo:** [https://screeder.netlify.app/)
 
 ---
 
