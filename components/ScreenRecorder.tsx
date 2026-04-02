@@ -1,0 +1,402 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { createUploadUrl, getAssetIdFromUpload } from "@/app/actions";
+import { Loader2, StopCircle, Monitor, RotateCcw, Upload, Play, Pause } from "lucide-react";
+
+export default function ScreenRecorder() {
+  const [isRecording, setIsRecording] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const [mediaBlob, setMediaBlob] = useState<Blob | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [mockTranscript, setMockTranscript] = useState<string | null>(null);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const screenStreamRef = useRef<MediaStream | null>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
+  const liveVideoRef = useRef<HTMLVideoElement>(null);
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isHoveringPreview, setIsHoveringPreview] = useState(false);
+
+  const router = useRouter();
+
+  const togglePlay = () => {
+    if (!previewVideoRef.current) return;
+    
+    if (previewVideoRef.current.paused) {
+      const playPromise = previewVideoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          if (error.name !== "AbortError") {
+            console.error("Playback error:", error);
+          }
+        });
+      }
+      setIsPlaying(true);
+    } else {
+      previewVideoRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    if (isNaN(time)) return "0:00";
+    const m = Math.floor(time / 60);
+    const s = Math.floor(time % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
+
+  const startRecording = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+
+      const micStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100,
+        },
+        video: false,
+      });
+
+      screenStreamRef.current = screenStream;
+      micStreamRef.current = micStream;
+
+      const combinedStream = new MediaStream([
+        ...screenStream.getVideoTracks(),
+        ...micStream.getAudioTracks(),
+      ]);
+
+      if (liveVideoRef.current) {
+        liveVideoRef.current.srcObject = combinedStream;
+      }
+
+      const mediaRecorder = new MediaRecorder(combinedStream, {
+        mimeType: "video/webm;codecs=vp9",
+      });
+
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: "video/webm" });
+        setMediaBlob(blob);
+        const url = URL.createObjectURL(blob);
+        setPreviewUrl(url);
+
+        if (liveVideoRef.current) {
+          liveVideoRef.current.srcObject = null;
+        }
+
+        screenStreamRef.current?.getTracks().forEach((t) => t.stop());
+        micStreamRef.current?.getTracks().forEach((t) => t.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+
+      screenStream.getVideoTracks()[0].onended = stopRecording;
+    } catch (error) {
+      console.error("Error starting recording:", error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!mediaBlob) return;
+    setIsUploading(true);
+    setUploadProgress("Preparing upload…");
+
+    try {
+      const uploadConfig = await createUploadUrl();
+
+      // ── Mock mode: no Mux keys ──────────────────────────────────────────
+      if (!("url" in uploadConfig)) {
+        setUploadProgress("Saving locally…");
+
+        // Trigger a local download of the recorded blob
+        const downloadUrl = URL.createObjectURL(mediaBlob);
+        const anchor = document.createElement("a");
+        anchor.href = downloadUrl;
+        anchor.download = `screeder-recording-${Date.now()}.webm`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        // Keep the object URL alive for the preview player — do not revoke here
+
+        setMockTranscript(
+          "[Local Mode] Here you would have a real transcription generated by Mux. The video would also be hosted on Mux servers. To enable these features, clone the repo and add your Mux API keys to the .env file."
+        );
+        setIsUploading(false);
+        setUploadProgress(null);
+        return;
+      }
+
+      // ── Real path: upload to Mux ────────────────────────────────────────
+      setUploadProgress("Uploading recording…");
+
+      await fetch(uploadConfig.url, {
+        method: "PUT",
+        body: mediaBlob,
+      });
+
+      setUploadProgress("Processing — this may take a moment…");
+
+      while (true) {
+        const result = await getAssetIdFromUpload(uploadConfig.id);
+        if (result && result.playbackId) {
+          router.push(`/video/${result.playbackId}`);
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    } catch (error) {
+      console.error("Error uploading video:", error);
+      setIsUploading(false);
+      setUploadProgress(null);
+    }
+  };
+
+  const handleRetake = () => {
+    setMediaBlob(null);
+    setUploadProgress(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center w-full gap-4">
+      {/* Live preview */}
+      <div
+        className="relative w-full aspect-video bg-black/50 rounded-lg overflow-hidden border border-white/8 shadow-inner flex flex-col"
+        role="region"
+        aria-label="Screen recording preview"
+      >
+        {/* Hidden-but-accessible label for the video element */}
+        <span id="video-label" className="sr-only">
+          Live screen recording preview
+        </span>
+        {!previewUrl ? (
+          <video
+            ref={liveVideoRef}
+            playsInline
+            autoPlay
+            muted
+            aria-labelledby="video-label"
+            className="w-full h-full object-cover"
+          />
+        ) : (() => {
+          // Controls must live OUTSIDE overflow-hidden — backdrop-filter breaks inside composited clip contexts.
+          // We use React hover state instead of CSS group-hover.
+          return (
+            <div
+              className="absolute inset-0 bg-black z-0"
+              onMouseEnter={() => setIsHoveringPreview(true)}
+              onMouseLeave={() => setIsHoveringPreview(false)}
+            >
+              {/* Video (inside overflow-hidden parent, no backdrop-filter here) */}
+              <video
+                ref={previewVideoRef}
+                src={previewUrl}
+                playsInline
+                className="w-full h-full object-contain cursor-pointer"
+                onClick={togglePlay}
+                onTimeUpdate={() => setCurrentTime(previewVideoRef.current?.currentTime || 0)}
+                onLoadedMetadata={() => setDuration(previewVideoRef.current?.duration || 0)}
+                onEnded={() => setIsPlaying(false)}
+              />
+
+              {/* Controls — opacity-only fade, NO translate (translate breaks backdrop-filter via compositor promotion) */}
+              <div
+                className={`absolute inset-x-0 bottom-6 flex items-center justify-center gap-4 px-4 z-20 pointer-events-none transition-opacity duration-300 ease-out ${
+                  isHoveringPreview ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                {/* Play/Pause Circle */}
+                <button
+                  onClick={togglePlay}
+                  className="w-12 h-12 flex items-center justify-center rounded-full border border-white/20 shadow-2xl text-foreground hover:text-primary transition-colors pointer-events-auto"
+                  style={{ backdropFilter: "blur(20px)", background: "rgba(255,255,255,0.1)" }}
+                  aria-label={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+                </button>
+
+                {/* Seek Bar Pill */}
+                <div
+                  className="flex items-center gap-4 px-6 h-12 rounded-full border border-white/20 shadow-2xl pointer-events-auto"
+                  style={{ backdropFilter: "blur(20px)", background: "rgba(255,255,255,0.1)" }}
+                >
+                  <div className="text-sm font-semibold text-foreground min-w-[4rem] text-center whitespace-nowrap">
+                    {formatTime(currentTime)} <span className="text-muted-foreground font-normal">/ {formatTime(duration)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={duration || 100}
+                    value={currentTime}
+                    onChange={(e) => {
+                      if (previewVideoRef.current) {
+                        previewVideoRef.current.currentTime = Number(e.target.value);
+                        setCurrentTime(Number(e.target.value));
+                      }
+                    }}
+                    className="w-32 sm:w-48 lg:w-64 accent-primary cursor-pointer h-1.5 bg-white/20 rounded-lg appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full"
+                    aria-label="Seek video"
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ── Idle — call-to-action ── */}
+        {!isRecording && !mediaBlob && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-zinc-950/40 backdrop-blur-sm">
+            <button
+              id="start-recording-btn"
+              onClick={startRecording}
+              className="btn btn-danger rounded-full p-4 shadow-lg animate-record-pulse"
+              aria-label="Start screen recording"
+            >
+              <Monitor className="w-10 h-10 sm:w-12 sm:h-12" aria-hidden="true" />
+            </button>
+            <p className="text-sm text-muted-foreground font-medium tracking-wide">
+              Click to start recording
+            </p>
+          </div>
+        )}
+
+        {/* ── Recording in progress ── */}
+        {isRecording && (
+          <>
+            {/* REC badge */}
+            <div
+              className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/60 backdrop-blur rounded-full border border-red-500/40"
+              aria-live="assertive"
+              aria-label="Recording in progress"
+            >
+              <span
+                className="w-2 h-2 rounded-full bg-red-500"
+                style={{ animation: "ping-slow 1.2s ease-out infinite" }}
+                aria-hidden="true"
+              />
+              <span className="text-xs font-semibold text-red-400 tracking-wider">
+                REC
+              </span>
+            </div>
+
+            {/* Stop button */}
+            <div className="absolute inset-0 flex items-end justify-center pb-6">
+              <button
+                onClick={stopRecording}
+                className="btn btn-danger rounded-full p-3 sm:p-4 shadow-xl"
+                aria-label="Stop recording"
+              >
+                <StopCircle className="w-8 h-8 sm:w-10 sm:h-10" aria-hidden="true" />
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ── Recorded — upload/retake ── */}
+        {mediaBlob && !isUploading && (
+          <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-b from-black/80 to-transparent pointer-events-none z-10">
+            <span className="text-sm font-semibold text-foreground bg-black/50 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md shadow-lg pointer-events-auto">
+              Recording Ready
+            </span>
+            <div className="flex items-center gap-3 pointer-events-auto">
+              <button
+                onClick={handleRetake}
+                className="btn btn-ghost rounded-full bg-white/10 hover:bg-white/20 text-foreground border border-white/20 backdrop-blur-md shadow-lg transition-all"
+                aria-label="Discard recording and retake"
+              >
+                <RotateCcw className="w-4 h-4" aria-hidden="true" />
+                Retake
+              </button>
+              <button
+                onClick={handleUpload}
+                disabled={isUploading}
+                className="btn btn-primary rounded-full shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all hover:scale-105"
+                aria-label="Upload and analyze recording"
+              >
+                <Upload className="w-4 h-4 ml-0.5" aria-hidden="true" />
+                Upload &amp; Analyze
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Uploading ── */}
+        {isUploading && (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm"
+            role="status"
+            aria-live="polite"
+            aria-label={uploadProgress || "Uploading…"}
+          >
+            <div className="flex flex-col items-center justify-center gap-6">
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+              <p className="text-sm text-foreground font-medium text-center px-4">
+              {uploadProgress}
+            </p>
+          </div>
+          </div>
+        )}
+      </div>
+
+      {/* Keyboard hint */}
+      {!isRecording && !mediaBlob && (
+        <p className="text-xs text-muted-foreground text-center">
+          Powered by Screeder AI+ microphone audio will be captured.
+        </p>
+      )}
+
+      {/* ── Local Mode Transcript ──────────────────────────────────────── */}
+      {mockTranscript && (
+        <div
+          className="glass rounded-2xl p-5 space-y-3 animate-fade-in-up w-full"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">
+              Local Transcript
+            </span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {mockTranscript}
+          </p>
+          <p className="text-xs text-muted-foreground/60 italic">
+            Your recording has been saved to your downloads folder.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

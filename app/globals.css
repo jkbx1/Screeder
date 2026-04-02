@@ -1,26 +1,463 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* LIGHT MODE (Lavender Blush & Almond Silk) */
+  --background: #f8edec;
+  --foreground: #150f12;
+
+  /* Surfaces */
+  --card: #f6efee;
+  --card-foreground: #150f12;
+  --popover: #f8edec;
+  --popover-foreground: #150f12;
+
+  /* Brand */
+  --primary: #755766;
+  --primary-foreground: #f8edec;
+  --accent-blue: #ba4d45;
+  --accent-purple: #837c80;
+
+  /* Neutrals */
+  --secondary: #e7e4e5;
+  --secondary-foreground: #1d161a;
+  --muted: #cecacc;
+  --muted-foreground: #6a6266;
+  --accent: #b5b0b3;
+  --accent-foreground: #150f12;
+
+  /* Semantic */
+  --destructive: #ef4444;
+  --destructive-foreground: #f8edec;
+  --success: #22c55e;
+  --warning: #f59e0b;
+
+  /* Borders & Inputs */
+  --border: #cecacc;
+  --border-subtle: rgba(21, 15, 18, 0.08); /* Dark subtle border */
+  --border-emphasis: rgba(21, 15, 18, 0.2);
+  --input: #cecacc;
+  --ring: #755766;
+
+  /* Glass Variables (Light) */
+  --glass-bg-1: rgba(246, 239, 238, 0.4);
+  --glass-bg-2: rgba(238, 224, 221, 0.25);
+  --glass-border-light: rgba(255, 255, 255, 0.6);
+  --glass-border-dark: rgba(0, 0, 0, 0.05);
+  --glass-shadow-dark: rgba(21, 15, 18, 0.15);
+  --glass-shadow-dark-hover: rgba(21, 15, 18, 0.25);
+  --glass-shadow-dark-deep: rgba(21, 15, 18, 0.35);
+  --glass-shadow-light: rgba(255, 255, 255, 0.9);
+  --glass-shadow-light-hover: rgba(255, 255, 255, 1);
+  --glass-inset-light: rgba(255, 255, 255, 0.6);
+  --glass-inset-dark: rgba(0, 0, 0, 0.08);
+  --glass-inset-hover: rgba(255, 255, 255, 0.8);
+  --glass-inset-dark-hover: rgba(0, 0, 0, 0.12);
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-full: 9999px;
 }
+
+.dark {
+  /* DARK MODE (Coffee Bean & Almond Silk Accents) */
+  --background: #150f12;
+  --foreground: #f8edec;
+
+  /* Surfaces */
+  --card: #1d161a;
+  --card-foreground: #f8edec;
+  --popover: #1d161a;
+  --popover-foreground: #f8edec;
+
+  /* Brand */
+  --primary: #aa6255;
+  --primary-foreground: #f8edec;
+  --accent-blue: #ba4d45;
+  --accent-purple: #837c80;
+
+  /* Neutrals */
+  --secondary: #3b2b33;
+  --secondary-foreground: #f8edec;
+  --muted: #353133;
+  --muted-foreground: #b5b0b3;
+  --accent: #353133;
+  --accent-foreground: #f8edec;
+
+  /* Semantic */
+  --destructive: #ef4444; 
+  --destructive-foreground: #f8edec;
+  --success: #22c55e;
+  --warning: #f59e0b;
+
+  /* Borders & Inputs */
+  --border: #3b2b33;
+  --border-subtle: rgba(255, 255, 255, 0.05); /* Light subtle border */
+  --border-emphasis: rgba(255, 255, 255, 0.15);
+  --input: #3b2b33;
+  --ring: #aa6255;
+
+  /* Glass Variables (Dark) */
+  --glass-bg-1: rgba(25, 25, 30, 0.45);
+  --glass-bg-2: rgba(15, 15, 20, 0.25);
+  --glass-border-light: rgba(255, 255, 255, 0.15);
+  --glass-border-dark: rgba(0, 0, 0, 0.2);
+  --glass-shadow-dark: rgba(0, 0, 0, 0.7);
+  --glass-shadow-dark-hover: rgba(0, 0, 0, 0.8);
+  --glass-shadow-dark-deep: rgba(0, 0, 0, 0.9);
+  --glass-shadow-light: rgba(255, 255, 255, 0.03);
+  --glass-shadow-light-hover: rgba(255, 255, 255, 0.05);
+  --glass-inset-light: rgba(255, 255, 255, 0.08);
+  --glass-inset-dark: rgba(0, 0, 0, 0.3);
+  --glass-inset-hover: rgba(255, 255, 255, 0.12);
+  --glass-inset-dark-hover: rgba(0, 0, 0, 0.5);
+}
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-mono-serif, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Base ───────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ─── Accessibility ──────────────────────────────────────────────────────────── */
+
+/* Skip-to-content link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-4);
+  z-index: 9999;
+  padding: var(--space-3) var(--space-6);
+  background: var(--accent-blue);
+  color: #fff;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+/* Visually-hidden but accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus ring — consistent keyboard navigation indicator */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Glass & Neumorphism Surface ────────────────────────────────────────────── */
+.glass {
+  background: linear-gradient(135deg, var(--glass-bg-1) 0%, var(--glass-bg-2) 100%);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  backdrop-filter: blur(12px) saturate(1.2);
+  
+  /* The "Sheet melting to the ground" 3D neumorphism effect */
+  border: 1px solid transparent;
+  border-top: 1px solid var(--glass-border-light);
+  border-left: 1px solid var(--glass-border-light);
+  border-bottom: 1px solid var(--glass-border-dark);
+  border-right: 1px solid var(--glass-border-dark);
+
+  /* Multi-layered shadows to give that 'fall down on the floor' popup effect */
+  box-shadow: 
+    -12px -12px 24px -4px var(--glass-shadow-light), 
+    12px 12px 24px -4px var(--glass-shadow-dark),          
+    24px 24px 48px -12px var(--glass-shadow-dark-deep),         
+    inset 2px 2px 6px -2px var(--glass-inset-light),  
+    inset -2px -2px 6px -2px var(--glass-inset-dark);       
+    
+  border-radius: var(--radius-2xl); /* Big round corners for smooth drape */
+  
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass:hover {
+  transform: translateY(-4px);
+  border-top: 1px solid var(--glass-inset-light);
+  border-left: 1px solid var(--glass-inset-light);
+  box-shadow: 
+    -15px -15px 30px -5px var(--glass-shadow-light-hover),
+    15px 15px 30px -5px var(--glass-shadow-dark-hover),
+    30px 30px 60px -15px rgba(0, 0, 0, 1),
+    inset 2px 2px 8px -2px var(--glass-inset-hover),
+    inset -2px -2px 8px -2px var(--glass-inset-dark-hover);
+}
+
+/* ─── Typography Utilities ───────────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--foreground) 0%, var(--muted-foreground) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-blue {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ─── Button Base ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+    color var(--transition-fast), border-color var(--transition-fast),
+    transform var(--transition-fast), box-shadow var(--transition-fast),
+    opacity var(--transition-fast);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 0 0 0 transparent;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 20px var(--primary);
+}
+
+.btn-danger {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.btn-danger:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 20px var(--destructive);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted-foreground);
+  border-color: var(--border-subtle);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--foreground);
+  border-color: var(--border-emphasis);
+}
+
+/* ─── Custom Scrollbar ───────────────────────────────────────────────────────── */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* ─── Keyframe Animations ────────────────────────────────────────────────────── */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ping-slow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% center;
+  }
+  to {
+    background-position: 200% center;
+  }
+}
+
+@keyframes record-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+.animate-record-pulse {
+  animation: record-pulse 1.5s ease-out infinite;
+}
+
+/* ─── Card Hover Lift ────────────────────────────────────────────────────────── */
+.card-hover {
+  transition: transform var(--transition-base), border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-emphasis) !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Status Badge ───────────────────────────────────────────────────────────── */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-dot--live {
+  color: var(--destructive);
+  animation: ping-slow 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.status-dot--ready {
+  color: var(--success);
+}
+
+.status-dot--processing {
+  color: var(--accent-blue);
+  animation: ping-slow 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ─── Responsive Utilities ───────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
 }

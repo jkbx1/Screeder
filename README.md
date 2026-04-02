@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Screeder
+
+A modern, high-performance web app for recording, sharing, and analyzing screen captures — powered by **Mux** for video infrastructure and **OpenAI** for AI summaries.
+
+> **Live Demo:** [github.com/jkbx1/screeder](https://github.com/jkbx1/screeder)
+
+---
+
+## Features
+
+- 🎥 **Live Screen & Audio Recording** — Capture screen + microphone directly in the browser
+- ☁️ **Mux Cloud Upload** — Videos are encoded and hosted automatically via Mux
+- 🔐 **Signed Playback** — Secure video delivery using JWT-signed Mux tokens
+- 📝 **AI Transcripts** — Auto-generated captions powered by Mux AI
+- 🤖 **AI Summaries** — Concise summaries generated via OpenAI GPT-4o-mini
+- 🖥️ **High-Performance Player** — Smooth HLS playback via `@mux/mux-player-react`
+- 🌓 **Light / Dark Mode** — Premium glassmorphism design with theme toggle
+
+---
+
+## Mock Mode (No Keys Required)
+
+The app works **without any API keys** in a graceful fallback mode:
+
+| Feature | With Keys | Without Keys (Mock Mode) |
+|---|---|---|
+| Video recording | Uploads to Mux | Downloads locally as `.webm` |
+| Transcription | Mux AI captions | Placeholder message shown |
+| AI Summary | OpenAI GPT-4o-mini | Demo placeholder text |
+
+This makes it easy to explore the UI and code without needing a Mux or OpenAI account.
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/jkbx1/screeder.git
+cd screeder
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up environment variables
+
+```bash
+cp .env.example .env.local
+```
+
+Open `.env.local` and fill in your credentials:
+
+| Variable | Where to get it |
+|---|---|
+| `MUX_TOKEN_ID` | [Mux Dashboard → Access Tokens](https://dashboard.mux.com) |
+| `MUX_TOKEN_SECRET` | Same as above |
+| `MUX_SIGNING_KEY_ID` | [Mux Dashboard → Signing Keys](https://dashboard.mux.com) |
+| `MUX_SIGNING_KEY_PRIVATE` | Same as above (base64 private key) |
+| `OPENAI_API_KEY` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+
+### 4. Start the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open and start recording!
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tech Stack
 
-## Learn More
+| Technology | Role |
+|---|---|
+| [Next.js 14](https://nextjs.org/) | React framework (App Router, Server Actions) |
+| [Mux](https://mux.com/) | Video upload, encoding, signed playback & AI transcripts |
+| [OpenAI API](https://platform.openai.com/) | GPT-4o-mini for AI video summaries |
+| [Tailwind CSS](https://tailwindcss.com/) | Utility-first styling |
+| [Lucide React](https://lucide.dev/) | Icon library |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Security
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- All API keys are accessed **only on the server** via Next.js Server Actions (`app/actions.ts`)
+- No secrets are ever exposed to the client bundle
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
