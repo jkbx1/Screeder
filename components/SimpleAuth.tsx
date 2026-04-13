@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, LogOut, Loader2 } from "lucide-react";
+import { User, LogOut, LogIn, Loader2 } from "lucide-react";
 
 interface SimpleAuthProps {
   currentUser: string | null;
@@ -44,7 +44,7 @@ export default function SimpleAuth({ currentUser }: SimpleAuthProps) {
   if (currentUser) {
     return (
       <div
-        className="glass px-4 py-2 rounded-full flex items-center gap-3 shadow-lg shadow-black/20"
+        className="glass px-3 sm:px-4 py-2 rounded-full flex items-center gap-2 sm:gap-3 shadow-lg shadow-black/20"
         role="status"
         aria-label={`Signed in as ${currentUser}`}
       >
@@ -55,7 +55,7 @@ export default function SimpleAuth({ currentUser }: SimpleAuthProps) {
         >
           <User className="w-3 h-3 text-primary-foreground" />
         </div>
-        <span className="text-muted-foreground text-sm font-medium leading-none">
+        <span className="text-muted-foreground text-sm font-medium leading-none truncate max-w-[60px] sm:max-w-none">
           {currentUser}
         </span>
 
@@ -75,7 +75,7 @@ export default function SimpleAuth({ currentUser }: SimpleAuthProps) {
               aria-hidden="true"
             />
           )}
-          <span>Log Out</span>
+          <span className="hidden sm:inline">Log Out</span>
         </button>
       </div>
     );
@@ -85,7 +85,7 @@ export default function SimpleAuth({ currentUser }: SimpleAuthProps) {
   return (
     <form
       onSubmit={handleLogin}
-      className="glass p-1 pl-4 rounded-full flex items-center gap-2 shadow-lg shadow-black/20 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-250"
+      className="glass p-1 pl-3 sm:pl-4 rounded-full flex items-center gap-1.5 sm:gap-2 shadow-lg shadow-black/20 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-250"
       aria-label="Login form"
     >
       <label htmlFor="username-input" className="sr-only">
@@ -98,21 +98,22 @@ export default function SimpleAuth({ currentUser }: SimpleAuthProps) {
         autoComplete="username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-        placeholder="Enter username…"
-        className="bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground w-36 sm:w-48 focus:ring-0"
+        placeholder="Username…"
+        className="bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground w-24 xs:w-32 sm:w-48 focus:ring-0"
         disabled={isLoading}
         aria-required="true"
       />
       <button
         type="submit"
         disabled={isLoading || !username.trim()}
-        className="btn btn-primary rounded-full py-1.5 min-w-[68px]"
+        className="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-primary text-primary-foreground hover:brightness-110 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+        style={{ borderRadius: "50%" }}
         aria-label="Log in"
       >
         {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+          <Loader2 className="w-4 h-4 animate-spin text-primary-foreground" />
         ) : (
-          "Log In"
+          <LogIn className="w-4 h-4 text-primary-foreground" />
         )}
       </button>
     </form>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Play, ArrowRight, Video, Sparkles, FileText } from "lucide-react";
 import SimpleAuth from "@/components/SimpleAuth";
 import ThemeToggle from "@/components/ThemeToggle";
+import ShowcaseVideo from "@/components/ShowcaseVideo";
 import { getCurrentUser } from "@/app/actions";
 
 export default async function LandingPage() {
@@ -12,15 +13,15 @@ export default async function LandingPage() {
       {/* ── Navigation ──────────────────────────────────────────────── */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-background/40 backdrop-blur-xl">
         <nav
-          className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3"
+          className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-3"
           aria-label="Main navigation"
         >
           {/* Brand mark */}
-          <span className="text-xl font-bold gradient-text tracking-tight select-none">
+          <span className="text-lg sm:text-xl font-bold gradient-text tracking-tight select-none">
             Screeder
           </span>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <ThemeToggle />
             <SimpleAuth currentUser={currentUser} />
           </div>
@@ -28,7 +29,7 @@ export default async function LandingPage() {
       </header>
 
       {/* ── Main Content ─────────────────────────────────────────────── */}
-      <main id="main-content" className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 flex-1 flex flex-col items-center py-24 lg:py-32">
+      <main id="main-content" className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 flex-1 flex flex-col items-center py-24 lg:py-32">
         {/* Hero */}
         <section
           className="text-center space-y-8 animate-fade-in-up flex flex-col items-center max-w-3xl min-h-[70vh] justify-center"
@@ -80,22 +81,14 @@ export default async function LandingPage() {
                 Capture your screen, camera, and microphone directly from your browser. We leverage standard Web APIs and integrate with <strong>Mux</strong> for instant, high-performance video hosting and smooth playback.
               </p>
             </div>
-            <div className="flex-1 w-full relative aspect-[16/10] rounded-3xl glass border border-white/10 overflow-hidden group shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-                <video 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline 
-                  aria-label="Lightning-fast recording demo"
-                  title="Lightning-fast recording demo"
-                  className="w-full h-full object-cover"
-                >
-                  <source src="/showcase/feature1.webm" type="video/webm" />
-                  <source src="/showcase/feature1.mp4" type="video/mp4" />
-                </video>
-              </div>
-            </div>
+            <ShowcaseVideo 
+              sources={[
+                { src: "/showcase/feature1.webm", type: "video/webm" },
+                { src: "/showcase/feature1.mp4", type: "video/mp4" }
+              ]}
+              ariaLabel="Lightning-fast recording demo"
+              title="Lightning-fast recording demo"
+            />
           </div>
 
           {/* Feature 2: Transcripts */}
@@ -109,22 +102,14 @@ export default async function LandingPage() {
                 Never take notes during a meeting again. Screeder integrates seamlessly with <strong>Mux's Auto-Generated AI Captions</strong> to deliver highly accurate transcripts for every recording, making your videos completely searchable.
               </p>
             </div>
-            <div className="flex-1 w-full relative aspect-[16/10] rounded-3xl glass border border-white/10 overflow-hidden group shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-                <video 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline 
-                  aria-label="Instant AI transcripts demo"
-                  title="Instant AI transcripts demo"
-                  className="w-full h-full object-cover"
-                >
-                  <source src="/showcase/feature2.webm" type="video/webm" />
-                  <source src="/showcase/feature2.mp4" type="video/mp4" />
-                </video>
-              </div>
-            </div>
+            <ShowcaseVideo 
+              sources={[
+                { src: "/showcase/feature2.webm", type: "video/webm" },
+                { src: "/showcase/feature2.mp4", type: "video/mp4" }
+              ]}
+              ariaLabel="Instant AI transcripts demo"
+              title="Instant AI transcripts demo"
+            />
           </div>
 
           {/* Feature 3: Summary */}
@@ -138,22 +123,14 @@ export default async function LandingPage() {
                 Get the gist in seconds. Built on the powerful <strong>OpenAI API</strong>, our system analyzes your video transcripts to generate concise summaries and actionable takeaways so you can focus on what matters most.
               </p>
             </div>
-            <div className="flex-1 w-full relative aspect-[16/10] rounded-3xl glass border border-white/10 overflow-hidden group shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-                <video 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline 
-                  aria-label="Smart AI summaries demo"
-                  title="Smart AI summaries demo"
-                  className="w-full h-full object-cover"
-                >
-                  <source src="/showcase/feature3.webm" type="video/webm" />
-                  <source src="/showcase/feature3.mp4" type="video/mp4" />
-                </video>
-              </div>
-            </div>
+            <ShowcaseVideo 
+              sources={[
+                { src: "/showcase/feature3.webm", type: "video/webm" },
+                { src: "/showcase/feature3.mp4", type: "video/mp4" }
+              ]}
+              ariaLabel="Smart AI summaries demo"
+              title="Smart AI summaries demo"
+            />
           </div>
         </section>
       </main>
