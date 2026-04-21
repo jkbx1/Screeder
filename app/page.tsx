@@ -5,6 +5,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 import ShowcaseVideo from "@/components/ShowcaseVideo";
 import { getCurrentUser } from "@/app/actions";
 
+import Footer from "@/components/Footer";
+
 export default async function LandingPage() {
   const currentUser = await getCurrentUser();
 
@@ -135,10 +137,7 @@ export default async function LandingPage() {
         </section>
       </main>
       
-      {/* ── Footer ───────────────────────────────────────────────────── */}
-      <footer className="relative z-10 w-full border-t border-white/5 py-10 text-center text-xs text-muted-foreground">
-        <p>© {new Date().getFullYear()} Screeder. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

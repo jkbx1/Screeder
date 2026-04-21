@@ -9,6 +9,7 @@ import VideoThumbnail from "@/components/VideoThumbnail";
 import SimpleAuth from "@/components/SimpleAuth";
 import ThemeToggle from "@/components/ThemeToggle";
 import DeleteRecordingButton from "@/components/DeleteRecordingButton";
+import Footer from "@/components/Footer";
 
 export default async function DashboardPage() {
   const currentUser = await getCurrentUser();
@@ -177,6 +178,7 @@ export default async function DashboardPage() {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

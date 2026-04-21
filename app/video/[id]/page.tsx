@@ -6,6 +6,7 @@ import VideoSummary from "@/components/VideoSummary";
 import ShareButton from "@/components/ShareButton";
 import DeleteRecordingButton from "@/components/DeleteRecordingButton";
 import { ArrowLeft, Download, Lock } from "lucide-react";
+import Footer from "@/components/Footer";
 
 export default async function VideoPage({
   params,
@@ -159,6 +160,7 @@ export default async function VideoPage({
           </aside>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

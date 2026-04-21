@@ -10,6 +10,7 @@ import {
 } from "@/app/actions";
 import { Play, Calendar, Clock, LayoutGrid, Lock } from "lucide-react";
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 export default async function AppHome() {
   // ── Authorization boundary ────────────────────────────────────────────────
@@ -278,10 +279,7 @@ export default async function AppHome() {
         </section>
       </main>
 
-      {/* ── Footer ───────────────────────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/5 py-10 text-center text-xs text-muted-foreground mt-20">
-        <p>© {new Date().getFullYear()} Screeder. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
